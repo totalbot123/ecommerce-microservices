@@ -1,0 +1,5 @@
+-- Product application: returns product data to end-clients.
+-- The application exposes REST API for retrieving available products data by ‘uniq_id’ and by ‘sku’ (multiple products are returned).
+-- The REST service makes REST call to catalog application to get product data by ‘uniq_id’ or by ‘sku’
+-- and make a call to the inventory application to get product availability 
+-- and filter out only available product before returning.
