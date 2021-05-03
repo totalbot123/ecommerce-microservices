@@ -1,12 +1,15 @@
 package gridu.milanjecmenica.catalog.controller;
 
+import static gridu.milanjecmenica.catalog.service.GridUCatalogService.productStub;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,14 +30,22 @@ public class GridUCatalogController implements CatalogController {
     @Override
     @GetMapping(value = "/product/{id}", produces = "application/json")
     @ResponseBody
-    public Product getProduct(@PathVariable String id) {
-        return catalogService.getProduct(id);
+    public ResponseEntity<Product> getProduct(@PathVariable String id) {
+        Product product = catalogService.getProduct(id);
+        if (product.equals(productStub)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
     @Override
     @PostMapping("/products")
-    public List<Product> getProducts(@RequestParam String sku) {
-        return catalogService.getProducts(sku);
+    public ResponseEntity<List<Product> > getProducts(@RequestParam String sku) {
+        List<Product> productList = catalogService.getProducts(sku);
+        if (productList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(productList, HttpStatus.OK);
     }
     
 }
