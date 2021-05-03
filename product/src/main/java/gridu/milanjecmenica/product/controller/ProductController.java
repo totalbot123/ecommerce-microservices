@@ -2,11 +2,14 @@ package gridu.milanjecmenica.product.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 import gridu.milanjecmenica.product.model.Product;
 
 public interface ProductController {
 
-    public Product getProduct(String id);
+    public ResponseEntity<Product> getProduct(String id);
 
-    public List<Product> getProducts(String sku);
+    public ResponseEntity<List<Product> > getProducts(String sku);
+    
 }

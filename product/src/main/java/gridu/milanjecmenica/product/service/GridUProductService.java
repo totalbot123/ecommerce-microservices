@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import gridu.milanjecmenica.product.model.Inventory;
 import gridu.milanjecmenica.product.model.Product;
@@ -19,21 +20,27 @@ import gridu.milanjecmenica.product.model.Product;
 @Service
 public class GridUProductService implements ProductService {
 
+    public static final Product productStub = new Product();
+
     @Autowired
     RestTemplate restTemplate;
 
-    Function<Product, Inventory> toInventory = p -> {
-        return this.restTemplate.getForObject("http://inventory/inventory/{id}", Inventory.class, p.getId()); 
+    Function<Product, ResponseEntity<Inventory>> toInventory = p -> {
+        return this.restTemplate.getForEntity("http://inventory/inventory/{id}", Inventory.class, p.getId()); 
     };
 
     @Override
     public Product getProduct(String id) {
-        Product product = this.restTemplate.getForObject("http://catalog/product/{id}", Product.class, id);
-        Inventory inventory = this.restTemplate.getForObject("http://inventory/inventory/{id}", Inventory.class, id);
-        if (inventory.getInventory() > 0) {
-            return product;
+        ResponseEntity<Product> productEntity = this.restTemplate.getForEntity("http://catalog/product/{id}", Product.class, id);
+        ResponseEntity<Inventory> inventoryEntity = this.restTemplate.getForEntity("http://inventory/inventory/{id}", Inventory.class, id);
+        if (productEntity.getStatusCode() == HttpStatus.NOT_FOUND || inventoryEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
+            return productStub;
         }
-        throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Product " + product.getName() + " is not available.");
+        Inventory inventory = inventoryEntity.getBody();
+        if (inventory.getInventory() <= 0) {
+            return productStub;
+        }
+        return productEntity.getBody();
     }
 
     @Override
@@ -44,11 +51,16 @@ public class GridUProductService implements ProductService {
         List<Product> initialProducts = Arrays.asList(initialProductsRaw);
         List<Product> products = initialProducts.stream()
                                                 .map(toInventory)
-                                                .flatMap(id -> initialProducts.stream().filter(p -> p.getId().equals(id.getId()) && id.getInventory() > 0))
+                                                .flatMap(id -> initialProducts.stream()
+                                                                              .filter(p -> filterProducts(id, p)))
                                                 .collect(Collectors.toList());
         return products;
     }
 
-
+    private boolean filterProducts(ResponseEntity<Inventory> inventoryResponse, Product product) {
+        return inventoryResponse.getStatusCode() == HttpStatus.OK 
+            && inventoryResponse.getBody().getInventory() > 0 
+            && inventoryResponse.getBody().getId().equals(product.getId());
+    }
 
 }

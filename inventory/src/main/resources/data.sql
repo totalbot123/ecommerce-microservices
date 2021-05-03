@@ -17,5 +17,5 @@ INSERT INTO product_availability (uniq_id, inventory) VALUES
   ('8ffd0ef4fcaf1a82fb514aba5d20e05b', 50), 
   ('11fc82f52d6cf669df141ca67d61ac20', 30),
   ('44f8f8f108c6856acf9630dd1d78516d', 20),
-  ('8d1d057f5f808c10ce243c222ab0ef6e', 1),
+  ('8d1d057f5f808c10ce243c222ab0ef6e', 0),
   ('f3e02c48f16b56e8c1f126c8fe762812', 1000);
