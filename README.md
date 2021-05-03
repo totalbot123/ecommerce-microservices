@@ -1,7 +1,7 @@
 # Project Title
 
 Pet project for learning microservices in Java, using Spring framework.
-Project is build using Eureka, Hysterx and Zipkin.
+Project is build using Eureka, Hystrix and Zipkin.
 
 # Core microservices
 
