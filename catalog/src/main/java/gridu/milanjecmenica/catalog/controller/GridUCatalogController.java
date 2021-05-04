@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gridu.milanjecmenica.catalog.model.Product;
 import gridu.milanjecmenica.catalog.service.CatalogService;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 public class GridUCatalogController implements CatalogController {
 
     private CatalogService catalogService;
@@ -33,8 +35,10 @@ public class GridUCatalogController implements CatalogController {
     public ResponseEntity<Product> getProduct(@PathVariable String id) {
         Product product = catalogService.getProduct(id);
         if (product.equals(productStub)) {
+            log.error("GridUCatalogController :: getProduct - Product not found");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        log.info("GridUCatalogController :: getProduct - Success!");
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
@@ -43,8 +47,10 @@ public class GridUCatalogController implements CatalogController {
     public ResponseEntity<List<Product> > getProducts(@RequestParam String sku) {
         List<Product> productList = catalogService.getProducts(sku);
         if (productList.isEmpty()) {
+            log.error("GridUCatalogController :: getProducts - No products with set SKU");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        log.info("GridUCatalogController :: getProducts - Success!");
         return new ResponseEntity<>(productList, HttpStatus.OK);
     }
     

@@ -16,8 +16,10 @@ import org.springframework.web.client.RestTemplate;
 
 import gridu.milanjecmenica.product.model.Inventory;
 import gridu.milanjecmenica.product.model.Product;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class GridUProductService implements ProductService {
 
     public static final Product productStub = new Product();
@@ -34,12 +36,15 @@ public class GridUProductService implements ProductService {
         ResponseEntity<Product> productEntity = this.restTemplate.getForEntity("http://catalog/product/{id}", Product.class, id);
         ResponseEntity<Inventory> inventoryEntity = this.restTemplate.getForEntity("http://inventory/inventory/{id}", Inventory.class, id);
         if (productEntity.getStatusCode() == HttpStatus.NOT_FOUND || inventoryEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
+            log.error("GridUProductService :: getProduct - Error!");
             return productStub;
         }
         Inventory inventory = inventoryEntity.getBody();
         if (inventory.getInventory() <= 0) {
+            log.info("GridUProductService :: getProduct - Inventory 0 for product: " + inventory.getId());
             return productStub;
         }
+        log.info("GridUProductService :: getProduct - Success!");
         return productEntity.getBody();
     }
 
@@ -54,6 +59,7 @@ public class GridUProductService implements ProductService {
                                                 .flatMap(id -> initialProducts.stream()
                                                                               .filter(p -> filterProducts(id, p)))
                                                 .collect(Collectors.toList());
+        log.info("GridUProductService :: getProducts - Success!");
         return products;
     }
 
